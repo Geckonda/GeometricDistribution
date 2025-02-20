@@ -18,6 +18,7 @@ namespace ChartGraphic
         public ChartForm()
         {
             InitializeComponent();
+            this.AutoScaleMode = AutoScaleMode.Dpi; // Включаем масштабирование по DPI
             InitializeDataGridView();
             InitializeChart();
         }
@@ -40,22 +41,22 @@ namespace ChartGraphic
             dataTable.Columns[3].HeaderText = "Теоретическая вероятность";
             this.Controls.Add(dataTable);
         }
-        private void InitializeChart()
-        {
-            chart = new Chart();
-            chart.Parent = this; // Добавляем в форму
-            chart.Dock = DockStyle.Bottom; // Прикрепляем к нижней части
-            chart.Height = this.ClientSize.Height / 2; // 50% от высоты формы
+        //private void InitializeChart()
+        //{
+        //    chart = new Chart();
+        //    chart.Parent = this; // Добавляем в форму
+        //    chart.Dock = DockStyle.Bottom; // Прикрепляем к нижней части
+        //    chart.Height = this.ClientSize.Height / 2; // 50% от высоты формы
 
-            var chartArea = new ChartArea("MainArea");
-            chart.ChartAreas.Add(chartArea);
-            var series = new Series("Data")
-            {
-                ChartType = SeriesChartType.Line
-            };
-            chart.Series.Add(series);
-            this.Controls.Add(chart);
-        }
+        //    var chartArea = new ChartArea("MainArea");
+        //    chart.ChartAreas.Add(chartArea);
+        //    var series = new Series("Data")
+        //    {
+        //        ChartType = SeriesChartType.Line
+        //    };
+        //    chart.Series.Add(series);
+        //    this.Controls.Add(chart);
+        //}
         private int ParseAxisComboBox(string text)
         {
             switch (text)
@@ -98,12 +99,6 @@ namespace ChartGraphic
                 dataTable.Rows.Add(p, q, i + 1, _mainData[i]);
             }
         }
-        private void FillTableBtn_Click(object sender, EventArgs e)
-        {
-            dataTable.Rows.Clear();
-            SimulateGeometricDistribution();
-            PrintChartBTN.Enabled = true;
-        }
         private void SimulateGeometricDistribution()
         {
             double p = (double)parP.Value; // Вероятность успеха
@@ -138,27 +133,129 @@ namespace ChartGraphic
                 dataTable.Rows.Add(m, frequency[m], practicalProbability, theoreticalProbability);
             }
         }
-        private void PrintChart()
+        private void InitializeChart()
+        {
+            chart = new Chart();
+            chart.Parent = this; // Добавляем в форму
+            chart.Dock = DockStyle.Bottom; // Прикрепляем к нижней части
+            chart.Height = this.ClientSize.Height / 2; // 50% от высоты формы
+
+            var chartArea = new ChartArea("MainArea");
+            chart.ChartAreas.Add(chartArea);
+
+            // Серия для практической вероятности
+            var practicalSeries = new Series("PracticalProbability")
+            {
+                ChartType = SeriesChartType.Column, // Используем столбцы
+                Color = Color.Blue // Цвет для практической вероятности
+            };
+            chart.Series.Add(practicalSeries);
+
+            // Серия для теоретической вероятности
+            var theoreticalSeries = new Series("TheoreticalProbability")
+            {
+                ChartType = SeriesChartType.Column, // Используем столбцы
+                Color = Color.Red // Цвет для теоретической вероятности
+            };
+            chart.Series.Add(theoreticalSeries);
+
+            this.Controls.Add(chart);
+        }
+
+        private void PrepareChart()
         {
             ChartIsAbsentLabel.Visible = false;
-            var series = chart.Series["Data"];
-            series.Points.Clear(); // Очистка старых данных
-            series.ChartType = Enum.Parse<SeriesChartType>(chartTypeComboBox.Text);
-            var axisX = ParseAxisComboBox(AxisComboBox.Text);
+
+            // Очистка старых данных
+            chart.Series["PracticalProbability"].Points.Clear();
+            chart.Series["TheoreticalProbability"].Points.Clear();
+
+            // Установка типа графика
+            chart.Series["PracticalProbability"].ChartType = Enum.Parse<SeriesChartType>(chartTypeComboBox.Text);
+            chart.Series["TheoreticalProbability"].ChartType = Enum.Parse<SeriesChartType>(chartTypeComboBox.Text);
+        }
+
+        private void BuildPracticalChart()
+        {
             foreach (DataGridViewRow row in dataTable.Rows)
             {
-                if (row.Cells[0].Value != null && row.Cells[axisX].Value != null)
+                if (row.Cells[0].Value != null && row.Cells[2].Value != null)
                 {
                     if (double.TryParse(row.Cells[0].Value.ToString(), out double x) &&
-                        double.TryParse(row.Cells[axisX].Value.ToString(), out double y))
+                        double.TryParse(row.Cells[2].Value.ToString(), out double practicalY))
                     {
-                        series.Points.AddXY(x, y);
+                        // Добавляем точки для практической вероятности
+                        chart.Series["PracticalProbability"].Points.AddXY(x, practicalY);
                     }
                 }
             }
-            chart.ChartAreas[0].AxisY.Maximum = series.Points.Max(p => p.YValues[0]);
+        }
+
+        private void BuildTheoreticalChart()
+        {
+            foreach (DataGridViewRow row in dataTable.Rows)
+            {
+                if (row.Cells[0].Value != null && row.Cells[3].Value != null)
+                {
+                    if (double.TryParse(row.Cells[0].Value.ToString(), out double x) &&
+                        double.TryParse(row.Cells[3].Value.ToString(), out double theoreticalY))
+                    {
+                        // Добавляем точки для теоретической вероятности
+                        chart.Series["TheoreticalProbability"].Points.AddXY(x, theoreticalY);
+                    }
+                }
+            }
+        }
+
+        private void FinalizeChart()
+        {
+            // Находим максимальное значение для практической вероятности (если есть точки)
+            double maxPractical = chart.Series["PracticalProbability"].Points.Count > 0
+                ? chart.Series["PracticalProbability"].Points.Max(p => p.YValues[0])
+                : double.MinValue;
+
+            // Находим максимальное значение для теоретической вероятности (если есть точки)
+            double maxTheoretical = chart.Series["TheoreticalProbability"].Points.Count > 0
+                ? chart.Series["TheoreticalProbability"].Points.Max(p => p.YValues[0])
+                : double.MinValue;
+
+            // Устанавливаем максимальное значение оси Y
+            chart.ChartAreas[0].AxisY.Maximum = Math.Max(maxPractical, maxTheoretical);
 
             ConfigureChart();
+        }
+
+        private void PrintChart()
+        {
+            PrepareChart(); // Подготовка графика
+            switch(ChartComboBox.Text)
+            {
+                case ("По практ. вероятности"):
+                    BuildPracticalChart(); // Построение практической вероятности
+                    break;
+                case ("По теорет. вероятности"):
+                    BuildTheoreticalChart(); // Построение теоретической вероятности
+                    break;
+                default:
+                    BuildTheoreticalChart(); // Построение теоретической вероятности
+                    BuildPracticalChart(); // Построение практической вероятности
+                    break;
+            }
+            FinalizeChart(); // Завершение настройки
+        }
+
+        private void PrintPracticalChart()
+        {
+            PrepareChart(); // Подготовка графика
+            BuildPracticalChart(); // Построение практической вероятности
+            FinalizeChart(); // Завершение настройки
+        }
+
+        private void PrintTheoreticalChart()
+        {
+            PrepareChart(); // Подготовка графика
+            BuildTheoreticalChart(); // Построение теоретической вероятности
+            FinalizeChart(); // Завершение настройки
         }
 
         private void ConfigureChart()
@@ -173,20 +270,16 @@ namespace ChartGraphic
             chart.ChartAreas[0].CursorY.IsUserEnabled = true;
             chart.ChartAreas[0].CursorY.IsUserSelectionEnabled = true;
         }
-        private void PrintChartBTN_Click(object sender, EventArgs e)
-        {
-            PrintChart();
-            PrintChartBTN.Enabled = false;
-        }
 
         private void RestBTN_Click(object sender, EventArgs e)
         {
             dataTable.Rows.Clear();
             parP.Value = 0.1M;
             parM.Value = 1_000_000;
-            chart.Series["Data"].Points.Clear();
-            PrintChartBTN.Enabled = false;
+            chart.Series["PracticalProbability"].Points.Clear();
+            chart.Series["TheoreticalProbability"].Points.Clear();
             chartTypeComboBox.SelectedIndex = 0;
+            ChartComboBox.SelectedIndex = 0;
             ChartIsAbsentLabel.Visible = true;
             chart.ChartAreas[0].AxisX.ScaleView.ZoomReset(); // Сбросить зум по X
             chart.ChartAreas[0].AxisY.ScaleView.ZoomReset(); // Сбросить зум по Y
@@ -195,10 +288,12 @@ namespace ChartGraphic
 
         private void chartTypeComboBox_TextChanged(object sender, EventArgs e)
         {
-            var series = chart.Series["Data"];
+            var series = chart.Series["PracticalProbability"];
+            series.ChartType = Enum.Parse<SeriesChartType>(chartTypeComboBox.Text);
+            series = chart.Series["TheoreticalProbability"];
             series.ChartType = Enum.Parse<SeriesChartType>(chartTypeComboBox.Text);
         }
-        private void AxisComboBox_TextChanged(object sender, EventArgs e)
+        private void ChartComboBox_TextChanged(object sender, EventArgs e)
         {
             if(dataTable.Rows.Count > 2)
                 PrintChart();
@@ -208,9 +303,7 @@ namespace ChartGraphic
         {
             dataTable.Rows.Clear();
             SimulateGeometricDistribution();
-            PrintChartBTN.Enabled = true;
             PrintChart();
-            PrintChartBTN.Enabled = false;
         }
 
        
