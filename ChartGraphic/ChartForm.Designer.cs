@@ -44,6 +44,7 @@ namespace ChartGraphic
             label1 = new Label();
             parP = new NumericUpDown();
             ChartIsAbsentLabel = new Label();
+            CompareBtn = new Button();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)parM).BeginInit();
             ((System.ComponentModel.ISupportInitialize)parP).BeginInit();
@@ -52,6 +53,7 @@ namespace ChartGraphic
             // panel1
             // 
             panel1.BackColor = SystemColors.GradientInactiveCaption;
+            panel1.Controls.Add(CompareBtn);
             panel1.Controls.Add(label4);
             panel1.Controls.Add(ChartComboBox);
             panel1.Controls.Add(FillAndBuildBtn);
@@ -180,6 +182,16 @@ namespace ChartGraphic
             ChartIsAbsentLabel.TabIndex = 2;
             ChartIsAbsentLabel.Text = "График не построен";
             // 
+            // CompareBtn
+            // 
+            CompareBtn.Location = new Point(3, 278);
+            CompareBtn.Name = "CompareBtn";
+            CompareBtn.Size = new Size(63, 34);
+            CompareBtn.TabIndex = 6;
+            CompareBtn.Text = "<=>";
+            CompareBtn.UseVisualStyleBackColor = true;
+            CompareBtn.Click += CompareBtn_Click;
+            // 
             // ChartForm
             // 
             AutoScaleMode = AutoScaleMode.None;
@@ -217,5 +229,6 @@ namespace ChartGraphic
         private Label ChartIsAbsentLabel;
         private Label label4;
         private ComboBox ChartComboBox;
+        private Button CompareBtn;
     }
 }

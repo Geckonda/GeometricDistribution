@@ -228,7 +228,7 @@ namespace ChartGraphic
         private void PrintChart()
         {
             PrepareChart(); // Подготовка графика
-            switch(ChartComboBox.Text)
+            switch (ChartComboBox.Text)
             {
                 case ("По практ. вероятности"):
                     BuildPracticalChart(); // Построение практической вероятности
@@ -295,7 +295,7 @@ namespace ChartGraphic
         }
         private void ChartComboBox_TextChanged(object sender, EventArgs e)
         {
-            if(dataTable.Rows.Count > 2)
+            if (dataTable.Rows.Count > 2)
                 PrintChart();
         }
 
@@ -306,6 +306,10 @@ namespace ChartGraphic
             PrintChart();
         }
 
-       
+        private void CompareBtn_Click(object sender, EventArgs e)
+        {
+            var compareForm = new CompareForm((double)parP.Value);
+            compareForm.Show();
+        }
     }
 }
