@@ -37,8 +37,8 @@ namespace ChartGraphic
             dataTable.Columns[1].Width = 100;
             dataTable.Columns[0].HeaderText = "ξ";
             dataTable.Columns[1].HeaderText = "Частота";
-            dataTable.Columns[2].HeaderText = "Практическая вероятность";
-            dataTable.Columns[3].HeaderText = "Теоретическая вероятность";
+            dataTable.Columns[2].HeaderText = "Относительная частота";
+            dataTable.Columns[3].HeaderText = "Вероятность";
             this.Controls.Add(dataTable);
         }
         //private void InitializeChart()
