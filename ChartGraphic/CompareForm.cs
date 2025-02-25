@@ -21,7 +21,7 @@ namespace ChartGraphic
         public CompareForm(double p)
         {
             InitializeComponent();
-            InitTable();
+            //InitTable();
             this.P = p;
             InitAllCharts();
         }
@@ -33,25 +33,29 @@ namespace ChartGraphic
 
             this.Controls.Add(flowLayoutPanel);
         }
-        private List<double[]> SimulateGeometricDistribution(int iterations)
+        private Dictionary<int, int> InitDictionary()
         {
-            double q = 1 - P;
-            const int n = 10;
-
-            var rand = new Random();
             var frequency = new Dictionary<int, int>();
-            List<double[]> dataTable = new List<double[]>();
-
-            // Инициализация словаря (от 1 до 50)
-            for (int m = 1; m <= n; m++)
+            for (int m = 1; m <= 50; m++)
             {
                 frequency[m] = 0;
             }
+            return frequency;
+        }
+        private List<double[]> SimulateGeometricDistribution(Dictionary<int, int> frequency, int beginIndex, int iterations)
+        {
+            double q = 1 - P;
+            int n = beginIndex + 9;
+
+            var rand = new Random();
+            List<double[]> dataTable = new List<double[]>();
+
+           
 
             // Симуляция N экспериментов
             for (int j = 0; j < iterations; j++)
             {
-                int m = 1;
+                int m = beginIndex;
                 while (rand.NextDouble() > P) // Считаем шаги до успеха
                 {
                     m++;
@@ -60,9 +64,9 @@ namespace ChartGraphic
                 if (m <= n) frequency[m]++;
             }
 
-            for (int m = 1; m <= n; m++)
+            for (int m = beginIndex; m <= n; m++)
             {
-                double theoreticalProbability = P * Math.Pow(q, m - 1);
+                double theoreticalProbability = P * Math.Pow(q, m  - beginIndex);
                 double practicalProbability = (double)frequency[m] / iterations;
 
                 var data = new double[] { m, frequency[m], practicalProbability, theoreticalProbability };
@@ -71,28 +75,34 @@ namespace ChartGraphic
             return dataTable;
         }
 
-        private void BuildPracticalChart(Chart chart,List<double[]> dataTable)
+        private void BuildPracticalChart(Chart chart, List<List<double[]>> dataList)
         {
-            foreach (var row in dataTable)
+            foreach (var dataTable in dataList)
             {
-                if (double.TryParse(row[0].ToString(), out double x) &&
-                    double.TryParse(row[2].ToString(), out double practicalY))
+                foreach (var row in dataTable)
                 {
-                    // Добавляем точки для практической вероятности
-                    chart.Series["PracticalProbability"].Points.AddXY(x, practicalY);
+                    if (double.TryParse(row[0].ToString(), out double x) &&
+                        double.TryParse(row[2].ToString(), out double practicalY))
+                    {
+                        // Добавляем точки для практической вероятности
+                        chart.Series["PracticalProbability"].Points.AddXY(x, practicalY);
+                    }
                 }
             }
         }
 
-        private void BuildTheoreticalChart(Chart chart, List<double[]> dataTable)
+        private void BuildTheoreticalChart(Chart chart, List<List<double[]>> dataList)
         {
-            foreach (var row in dataTable)
+            foreach (var dataTable in dataList)
             {
-                if (double.TryParse(row[0].ToString(), out double x) &&
-                    double.TryParse(row[3].ToString(), out double theoreticalY))
+                foreach (var row in dataTable)
                 {
-                    // Добавляем точки для теоретической вероятности
-                    chart.Series["TheoreticalProbability"].Points.AddXY(x, theoreticalY);
+                    if (double.TryParse(row[0].ToString(), out double x) &&
+                        double.TryParse(row[3].ToString(), out double theoreticalY))
+                    {
+                        // Добавляем точки для теоретической вероятности
+                        chart.Series["TheoreticalProbability"].Points.AddXY(x, theoreticalY);
+                    }
                 }
             }
         }
@@ -126,19 +136,19 @@ namespace ChartGraphic
             chart.ChartAreas[0].CursorY.IsUserEnabled = true;
             chart.ChartAreas[0].CursorY.IsUserSelectionEnabled = true;
         }
-        private void PrintChart(Chart chart, List<double[]> dataTable)
+        private void PrintChart(Chart chart, List<List<double[]>> dataList)
         {
-            BuildTheoreticalChart(chart, dataTable); // Построение теоретической вероятности
-            BuildPracticalChart(chart, dataTable); // Построение практической вероятности
+            BuildTheoreticalChart(chart, dataList); // Построение теоретической вероятности
+            BuildPracticalChart(chart, dataList); // Построение практической вероятности
             FinalizeChart(chart); // Завершение настройки
         }
         private Chart InitializeChart()
         {
             var chart = new Chart();
-            chart.Parent = flowLayoutPanel; // Добавляем в форму
-            //chart.Dock = DockStyle.Bottom; // Прикрепляем к нижней части
-            chart.Height = ClientSize.Height; // 50% от высоты формы
-            chart.Width = 287; // 50% от высоты формы
+            chart.Parent = this;
+            chart.Dock = DockStyle.Fill;
+            chart.Height = ClientSize.Height;
+            chart.Width = 100;
 
             var chartArea = new ChartArea("MainArea");
             chart.ChartAreas.Add(chartArea);
@@ -164,15 +174,47 @@ namespace ChartGraphic
 
         private void InitAllCharts()
         {
+            var chart = InitializeChart();
+            this.Controls.Add(chart);
+            List<List<double[]>> dataList = new();
+            int beginIndex = 1;
+            var dict = InitDictionary();
             foreach (var item in _quantityTries)
             {
-                var dataTable = SimulateGeometricDistribution(item);
-                var chart = InitializeChart();
-                chart.Titles.Add($"При {item}");
-                flowLayoutPanel.Controls.Add(chart);
-                PrintChart(chart, dataTable);
+                var dataTable = SimulateGeometricDistribution(dict, beginIndex, item);
+                dataList.Add(dataTable);
+                //chart.Titles.Add($"При {item}");
+                //flowLayoutPanel.Controls.Add(chart);
+                beginIndex += 10;
+            }
+            PrintChart(chart, dataList);
+            ChangeStripLineColour(chart);
+            AddTitlesToChart(chart);
+        }
+        private void ChangeStripLineColour(Chart chart)
+        {
+            // Настройка StripLines для фона
+            for (int i = 0; i <= 50; i += 10)
+            {
+                StripLine stripLine = new StripLine();
+                stripLine.IntervalOffset = i+0.5; // Начало интервала
+                stripLine.StripWidth = 10.5; // Ширина интервала
+                stripLine.BackColor = (i / 10) % 2 == 0 ? Color.LightGray : Color.White; // Чередование цветов
+                chart.ChartAreas[0].AxisX.StripLines.Add(stripLine);
             }
         }
-
+        private void AddTitlesToChart(Chart chart)
+        {
+            // Настройка подписей оси X через интервал в 10 единиц
+            for (int i = 5, k = 0; i < 55; i += 10, k++)
+            {
+                CustomLabel label = new CustomLabel();
+                label.FromPosition = i - 0.5; // Начало интервала подписи
+                label.ToPosition = i + 0.5;   // Конец интервала подписи
+                label.Text = $"При {_quantityTries[k]}";    // Текст подписи
+                chart.ChartAreas[0].AxisX.LabelStyle.Angle = -45; // Поворот на 45 градусов
+                chart.ChartAreas[0].AxisX.CustomLabels.Add(label);
+            }
+        }
     }
 }
