@@ -108,8 +108,8 @@ namespace ChartGraphic
             var rand = new Random();
             var frequency = new Dictionary<int, int>();
 
-            // Инициализация словаря (от 1 до 100)
-            for (int m = 1; m <= 100; m++)
+            // Инициализация словаря (от 1 до 50)
+            for (int m = 1; m <= 50; m++)
             {
                 frequency[m] = 0;
             }
@@ -121,12 +121,12 @@ namespace ChartGraphic
                 while (rand.NextDouble() > p) // Считаем шаги до успеха
                 {
                     m++;
-                    if (m > 100) break; // Ограничение, чтобы не выйти за пределы
+                    if (m > 50) break; // Ограничение, чтобы не выйти за пределы
                 }
-                if (m <= 100) frequency[m]++;
+                if (m <= 50) frequency[m]++;
             }
 
-            for (int m = 1; m <= 100; m++)
+            for (int m = 1; m <= 50; m++)
             {
                 double theoreticalProbability = p * Math.Pow(q, m - 1);
                 double practicalProbability = (double)frequency[m] / iterations;
