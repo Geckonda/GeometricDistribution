@@ -311,5 +311,12 @@ namespace ChartGraphic
             var compareForm = new CompareForm((double)parP.Value);
             compareForm.Show();
         }
+
+        private void AllLinesBtn_Click(object sender, EventArgs e)
+        {
+
+            var allLinesForm = new AllLinesForm((double)parP.Value);
+            allLinesForm.Show();
+        }
     }
 }

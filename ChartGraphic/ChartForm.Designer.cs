@@ -33,6 +33,7 @@ namespace ChartGraphic
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ChartForm));
             panel1 = new Panel();
+            CompareBtn = new Button();
             label4 = new Label();
             ChartComboBox = new ComboBox();
             FillAndBuildBtn = new Button();
@@ -44,7 +45,7 @@ namespace ChartGraphic
             label1 = new Label();
             parP = new NumericUpDown();
             ChartIsAbsentLabel = new Label();
-            CompareBtn = new Button();
+            AllLinesBtn = new Button();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)parM).BeginInit();
             ((System.ComponentModel.ISupportInitialize)parP).BeginInit();
@@ -53,6 +54,7 @@ namespace ChartGraphic
             // panel1
             // 
             panel1.BackColor = SystemColors.GradientInactiveCaption;
+            panel1.Controls.Add(AllLinesBtn);
             panel1.Controls.Add(CompareBtn);
             panel1.Controls.Add(label4);
             panel1.Controls.Add(ChartComboBox);
@@ -68,6 +70,16 @@ namespace ChartGraphic
             panel1.Name = "panel1";
             panel1.Size = new Size(191, 316);
             panel1.TabIndex = 1;
+            // 
+            // CompareBtn
+            // 
+            CompareBtn.Location = new Point(3, 278);
+            CompareBtn.Name = "CompareBtn";
+            CompareBtn.Size = new Size(50, 34);
+            CompareBtn.TabIndex = 6;
+            CompareBtn.Text = "<=>";
+            CompareBtn.UseVisualStyleBackColor = true;
+            CompareBtn.Click += CompareBtn_Click;
             // 
             // label4
             // 
@@ -121,9 +133,9 @@ namespace ChartGraphic
             // 
             // RestBTN
             // 
-            RestBTN.Location = new Point(73, 279);
+            RestBTN.Location = new Point(115, 279);
             RestBTN.Name = "RestBTN";
-            RestBTN.Size = new Size(112, 33);
+            RestBTN.Size = new Size(70, 33);
             RestBTN.TabIndex = 5;
             RestBTN.Text = "Сброс";
             RestBTN.UseVisualStyleBackColor = true;
@@ -182,15 +194,15 @@ namespace ChartGraphic
             ChartIsAbsentLabel.TabIndex = 2;
             ChartIsAbsentLabel.Text = "График не построен";
             // 
-            // CompareBtn
+            // AllLinesBtn
             // 
-            CompareBtn.Location = new Point(3, 278);
-            CompareBtn.Name = "CompareBtn";
-            CompareBtn.Size = new Size(63, 34);
-            CompareBtn.TabIndex = 6;
-            CompareBtn.Text = "<=>";
-            CompareBtn.UseVisualStyleBackColor = true;
-            CompareBtn.Click += CompareBtn_Click;
+            AllLinesBtn.Location = new Point(59, 278);
+            AllLinesBtn.Name = "AllLinesBtn";
+            AllLinesBtn.Size = new Size(50, 34);
+            AllLinesBtn.TabIndex = 10;
+            AllLinesBtn.Text = ">=<";
+            AllLinesBtn.UseVisualStyleBackColor = true;
+            AllLinesBtn.Click += AllLinesBtn_Click;
             // 
             // ChartForm
             // 
@@ -230,5 +242,6 @@ namespace ChartGraphic
         private Label label4;
         private ComboBox ChartComboBox;
         private Button CompareBtn;
+        private Button AllLinesBtn;
     }
 }
